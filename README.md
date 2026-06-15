@@ -59,7 +59,3 @@ chmod +x install.sh
 ./run_bench.sh pardiso ./matrices/lhr04.mtx 5
 
 ```
-
-```
-
-```
