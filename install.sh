@@ -14,6 +14,8 @@
 #   ./install.sh superlu    сборка SuperLU_MT 4.0.2
 #   ./install.sh build      сборка проекта
 #   ./install.sh check      диагностика (ничего не ставит)
+#   ./install.sh clean      удалить сборочный мусор (/tmp, build/)
+#   ./install.sh clean-all  + удалить собранные MUMPS/SuperLU (с подтверждением)
 #
 set -uo pipefail
 
@@ -119,17 +121,18 @@ step_superlu() {
         git clone "$SUPERLU_REPO" "$src" || die "git clone (сеть/DNS?)"
     fi
     cd "$src" || die "нет $src"
+    mkdir -p lib    # каталог для .a; в репозитории его нет, ar без него падает
     cat > make.inc <<EOF
 SuperLUroot = $src
 PLAT       = _PTHREAD
 TMGLIB     = libtmglib.a
-SUPERLULIB = \$(SuperLUroot)/lib/libsuperlu_mt\$(PLAT).a
+SUPERLULIB = ../lib/libsuperlu_mt\$(PLAT).a
 BLASDEF    = -DUSE_VENDOR_BLAS
 BLASLIB    = -lopenblas
 MATHLIB    = -lm
 MPLIB      = -lpthread
 CC         = gcc
-CFLAGS     = -O3 -fopenmp -D__PTHREAD -DAdd_
+CFLAGS     = -O3 -fopenmp -D__PTHREAD -DAdd_ -Wno-unused-result
 LOADER     = gcc
 LOADOPTS   = -O3 -fopenmp
 FORTRAN    = gfortran
@@ -139,8 +142,13 @@ ARCHFLAGS  = cr
 RANLIB     = ranlib
 EOF
     c_ok "make.inc: PTHREAD + OpenBLAS"
-    c_warn "make lib -j$NPROC"
-    make lib -j"$NPROC" || die "сборка SuperLU_MT — см. вывод"
+
+    # Верхний Makefile (цель lib) собирает все типы s/d/c/z и спотыкается на single.
+    # Нам нужен только double — собираем его напрямую через SRC/Makefile.
+    c_warn "make -C SRC double -j$NPROC (нужен только double precision)"
+    make -C SRC double -j"$NPROC" || die "сборка SuperLU_MT — см. вывод выше"
+    [ -f lib/libsuperlu_mt_PTHREAD.a ] \
+        || die "libsuperlu_mt_PTHREAD.a не появилась — см. вывод сборки выше"
     local libfile; libfile=$(ls lib/libsuperlu_mt_PTHREAD.a 2>/dev/null)
     [ -n "$libfile" ] || die "libsuperlu_mt_PTHREAD.a не появилась"
     sudo mkdir -p /usr/local/include/superlu_mt /usr/local/lib
@@ -171,6 +179,42 @@ step_build() {
     [ "$n" -gt 0 ] || die "ни один солвер не собрался"
 }
 
+# ════════════════════════════════════════════════════════════════════════════
+# Очистка
+# ════════════════════════════════════════════════════════════════════════════
+step_clean() {
+    c_step "Очистка сборочного мусора"
+    rm -rf "/tmp/MUMPS_${MUMPS_VER}" "/tmp/MUMPS_${MUMPS_VER}.tar.gz" /tmp/superlu_mt \
+           /tmp/_mabi.c /tmp/_mabi 2>/dev/null
+    c_ok "удалены /tmp/MUMPS_${MUMPS_VER}, /tmp/superlu_mt и временные файлы"
+    if [ -d "$PROJECT_DIR/build" ]; then
+        rm -rf "$PROJECT_DIR/build"
+        c_ok "удалён $PROJECT_DIR/build"
+    fi
+    c_warn "установленные библиотеки НЕ тронуты (полный сброс: ./install.sh clean-all)"
+}
+
+step_clean_all() {
+    c_step "Полная очистка (включая установленные библиотеки)"
+    c_warn "Будут удалены: собранный MUMPS, SuperLU_MT из /usr/local, сборка проекта."
+    c_warn "MKL и системные apt-пакеты НЕ затрагиваются."
+    printf "Продолжить? Введите yes для подтверждения: "
+    read -r ans
+    [ "$ans" = "yes" ] || { c_skip "отменено"; return 0; }
+    step_clean
+    if [ -d "$PROJECT_DIR/mumps_local" ]; then
+        rm -rf "$PROJECT_DIR/mumps_local"
+        c_ok "удалён $PROJECT_DIR/mumps_local"
+    fi
+    sudo rm -f /usr/local/lib/libsuperlu_mt_PTHREAD.a 2>/dev/null \
+        && c_ok "удалён /usr/local/lib/libsuperlu_mt_PTHREAD.a"
+    sudo rm -rf /usr/local/include/superlu_mt 2>/dev/null \
+        && c_ok "удалён /usr/local/include/superlu_mt"
+    sudo ldconfig
+    c_warn "MKL оставлен. Для удаления: sudo apt remove '$MKL_PKG' (вручную)"
+    c_ok "полная очистка завершена — можно ставить заново через ./install.sh"
+}
+
 step_check() {
     c_step "Диагностика окружения"
     chk(){ printf '%-34s' "$1"; shift; "$@" && c_ok "есть" || c_err "нет"; }
@@ -192,11 +236,12 @@ main() {
     case "${1:-all}" in
         apt) step_apt ;; mkl) step_mkl ;; mumps) step_mumps ;;
         superlu) step_superlu ;; build) step_build ;; check) step_check ;;
+        clean) step_clean ;; clean-all) step_clean_all ;;
         all)
             step_apt; step_mkl; step_mumps; step_superlu; step_build
             c_step "Готово"; step_check
             printf '\nЗапуск: ./run_all.sh matrices/<матрица>.mtx 4\n' ;;
-        *) die "шаг: apt|mkl|mumps|superlu|build|check|all" ;;
+        *) die "шаг: apt|mkl|mumps|superlu|build|check|clean|clean-all|all" ;;
     esac
 }
 main "$@"
