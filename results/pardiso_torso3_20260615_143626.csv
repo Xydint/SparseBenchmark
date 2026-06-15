@@ -1,0 +1,4 @@
+solver,matrix,rows,nnz,threads,run,factor_s,solve_s,residual,bwderr,mem_fact_mb,mem_rss_mb
+PARDISO,torso3.mtx,259156,4429042,1,1,31.9753,0.383229,1.22204e-13,1.91548e-19,2089.07,2242.2
+PARDISO,torso3.mtx,259156,4429042,2,1,23.1121,0.294386,1.22e-13,1.91228e-19,2098.83,2250.38
+PARDISO,torso3.mtx,259156,4429042,4,1,18.1223,0.293856,1.22016e-13,1.91254e-19,2121.64,2266.47

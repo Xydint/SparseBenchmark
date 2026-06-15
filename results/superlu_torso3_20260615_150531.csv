@@ -1,0 +1,1 @@
+solver,matrix,rows,nnz,threads,run,factor_s,solve_s,residual,bwderr,mem_fact_mb,mem_rss_mb

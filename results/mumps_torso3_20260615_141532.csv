@@ -1,0 +1,4 @@
+solver,matrix,rows,nnz,threads,run,factor_s,solve_s,residual,bwderr,mem_fact_mb,mem_rss_mb
+MUMPS,torso3.mtx,259156,4429042,1,1,24.5127,0.208686,1.87428e-13,2.93783e-19,2165,2425.85
+MUMPS,torso3.mtx,259156,4429042,2,1,16.0066,0.144268,2.00507e-13,3.14283e-19,2652,2723.92
+MUMPS,torso3.mtx,259156,4429042,4,1,19.2757,0.202592,2.00388e-13,3.14097e-19,2607,2659.45

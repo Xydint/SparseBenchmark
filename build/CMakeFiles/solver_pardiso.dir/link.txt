@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/solver_pardiso.dir/src/pardiso/main_pardiso.cpp.o CMakeFiles/solver_pardiso.dir/src/pardiso/pardiso_solver.cpp.o -o solver_pardiso  libsolver_common.a -lmkl_rt /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a 

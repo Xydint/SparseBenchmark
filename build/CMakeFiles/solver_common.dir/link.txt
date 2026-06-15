@@ -1,0 +1,2 @@
+/usr/bin/ar qc libsolver_common.a CMakeFiles/solver_common.dir/src/common/matrix_loader.cpp.o
+/usr/bin/ranlib libsolver_common.a

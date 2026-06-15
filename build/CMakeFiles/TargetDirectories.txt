@@ -1,0 +1,6 @@
+/home/xydint/SparseBenchmark/build/CMakeFiles/solver_common.dir
+/home/xydint/SparseBenchmark/build/CMakeFiles/solver_superlu.dir
+/home/xydint/SparseBenchmark/build/CMakeFiles/solver_pardiso.dir
+/home/xydint/SparseBenchmark/build/CMakeFiles/solver_mumps.dir
+/home/xydint/SparseBenchmark/build/CMakeFiles/edit_cache.dir
+/home/xydint/SparseBenchmark/build/CMakeFiles/rebuild_cache.dir

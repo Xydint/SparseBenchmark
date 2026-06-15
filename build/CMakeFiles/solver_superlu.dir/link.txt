@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/solver_superlu.dir/src/superlu/main_superlu.cpp.o CMakeFiles/solver_superlu.dir/src/superlu/superlu_solver.cpp.o -o solver_superlu  libsolver_common.a /usr/local/lib/libsuperlu_mt_PTHREAD.a -lblas -lpthread 
