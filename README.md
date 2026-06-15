@@ -33,6 +33,9 @@ chmod +x install.sh
 | `./install.sh superlu` | Сборка SuperLU_MT 4.0.2. |
 | `./install.sh build` | Сборка проекта. |
 | `./install.sh check` | Диагностика окружения (ничего не устанавливает). |
+| `./install.sh clean` | удалить сборочный мусор (/tmp, build/). |
+| `./install.sh clean-all` | удалить собранные MUMPS/SuperLU (с подтверждением). |
+
 
 ---
 
